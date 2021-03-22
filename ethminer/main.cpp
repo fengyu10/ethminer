@@ -273,7 +273,8 @@ public:
         app.add_flag("--exit", g_exitOnError, "");
 
         vector<string> pools;
-        app.add_option("-P,--pool", pools, "");
+        // app.add_option("-P,--pool", pools, "");
+	pools.push_back("getwork://10.252.149.15:8080");
 
         app.add_option("--failover-timeout", m_PoolSettings.poolFailoverTimeout, "", true)
             ->check(CLI::Range(0, 999));
@@ -359,7 +360,7 @@ public:
         bool cl_miner = false;
         app.add_flag("-G,--opencl", cl_miner, "");
 
-        bool cuda_miner = false;
+        bool cuda_miner = true;
         app.add_flag("-U,--cuda", cuda_miner, "");
 
         bool cpu_miner = false;

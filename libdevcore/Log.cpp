@@ -55,15 +55,16 @@ LogOutputStreamBase::LogOutputStreamBase(char const* _id)
     static std::locale logLocl = std::locale("");
         m_sstr.imbue(logLocl);
         if (g_logSyslog)
-            m_sstr << std::left << std::setw(8) << getThreadName() << " " EthReset;
+            // m_sstr << std::left << std::setw(8) << getThreadName() << " " EthReset;
+	    m_sstr << "1111";
         else
         {
             time_t rawTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
             char buf[24];
             if (strftime(buf, 24, "%X", localtime(&rawTime)) == 0)
                 buf[0] = '\0';  // empty if case strftime fails
-            m_sstr << _id << " " EthViolet << buf << " " EthBlue << std::left << std::setw(8)
-                   << getThreadName() << " " EthReset;
+            // m_sstr << _id << " " EthViolet << buf << " " EthBlue << std::left << std::setw(8)
+            //        << getThreadName() << " " EthReset;
         }
 }
 
@@ -108,7 +109,7 @@ void dev::simpleDebugOut(std::string const& _s)
         std::ostream& os = g_logStdout ? std::cout : std::clog;
         if (!g_logNoColor)
         {
-            os << _s + '\n';
+            // os << _s + '\n';
             os.flush();
             return;
         }
@@ -121,10 +122,10 @@ void dev::simpleDebugOut(std::string const& _s)
             else if (skip && it == 'm')
                 skip = false;
             else if (!skip)
-                ss << it;
+		ss << it;
         }
-        ss << '\n';
-        os << ss.str();
+        // ss << '\n';
+        // os << ss.str();
         os.flush();
     }
     catch (...)
