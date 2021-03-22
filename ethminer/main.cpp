@@ -521,116 +521,9 @@ public:
 #endif
 
         // Can't proceed without any GPU
-        if (!m_DevicesCollection.size())
+        if (!m_DevicesCollection.size()){
             throw std::runtime_error("No usable mining devices found");
 
-        // If requested list detected devices and exit
-        if (m_shouldListDevices)
-        {
-            cout << setw(4) << " Id ";
-            cout << setiosflags(ios::left) << setw(10) << "Pci Id    ";
-            cout << setw(5) << "Type ";
-            cout << setw(30) << "Name                          ";
-
-#if ETH_ETHASHCUDA
-            if (m_minerType == MinerType::CUDA || m_minerType == MinerType::Mixed)
-            {
-                cout << setw(5) << "CUDA ";
-                cout << setw(4) << "SM  ";
-            }
-#endif
-#if ETH_ETHASHCL
-            if (m_minerType == MinerType::CL || m_minerType == MinerType::Mixed)
-                cout << setw(5) << "CL   ";
-#endif
-            cout << resetiosflags(ios::left) << setw(13) << "Total Memory"
-                 << " ";
-#if ETH_ETHASHCL
-            if (m_minerType == MinerType::CL || m_minerType == MinerType::Mixed)
-            {
-                cout << resetiosflags(ios::left) << setw(13) << "Cl Max Alloc"
-                     << " ";
-                cout << resetiosflags(ios::left) << setw(13) << "Cl Max W.Grp"
-                     << " ";
-            }
-#endif
-
-            cout << resetiosflags(ios::left) << endl;
-            cout << setw(4) << "--- ";
-            cout << setiosflags(ios::left) << setw(10) << "--------- ";
-            cout << setw(5) << "---- ";
-            cout << setw(30) << "----------------------------- ";
-
-#if ETH_ETHASHCUDA
-            if (m_minerType == MinerType::CUDA || m_minerType == MinerType::Mixed)
-            {
-                cout << setw(5) << "---- ";
-                cout << setw(4) << "--- ";
-            }
-#endif
-#if ETH_ETHASHCL
-            if (m_minerType == MinerType::CL || m_minerType == MinerType::Mixed)
-                cout << setw(5) << "---- ";
-#endif
-            cout << resetiosflags(ios::left) << setw(13) << "------------"
-                 << " ";
-#if ETH_ETHASHCL
-            if (m_minerType == MinerType::CL || m_minerType == MinerType::Mixed)
-            {
-                cout << resetiosflags(ios::left) << setw(13) << "------------"
-                     << " ";
-                cout << resetiosflags(ios::left) << setw(13) << "------------"
-                     << " ";
-            }
-#endif
-            cout << resetiosflags(ios::left) << endl;
-            std::map<string, DeviceDescriptor>::iterator it = m_DevicesCollection.begin();
-            while (it != m_DevicesCollection.end())
-            {
-                auto i = std::distance(m_DevicesCollection.begin(), it);
-                cout << setw(3) << i << " ";
-                cout << setiosflags(ios::left) << setw(10) << it->first;
-                cout << setw(5);
-                switch (it->second.type)
-                {
-                case DeviceTypeEnum::Cpu:
-                    cout << "Cpu";
-                    break;
-                case DeviceTypeEnum::Gpu:
-                    cout << "Gpu";
-                    break;
-                case DeviceTypeEnum::Accelerator:
-                    cout << "Acc";
-                    break;
-                default:
-                    break;
-                }
-                cout << setw(30) << (it->second.name).substr(0, 28);
-#if ETH_ETHASHCUDA
-                if (m_minerType == MinerType::CUDA || m_minerType == MinerType::Mixed)
-                {
-                    cout << setw(5) << (it->second.cuDetected ? "Yes" : "");
-                    cout << setw(4) << it->second.cuCompute;
-                }
-#endif
-#if ETH_ETHASHCL
-                if (m_minerType == MinerType::CL || m_minerType == MinerType::Mixed)
-                    cout << setw(5) << (it->second.clDetected ? "Yes" : "");
-#endif
-                cout << resetiosflags(ios::left) << setw(13)
-                     << getFormattedMemory((double)it->second.totalMemory) << " ";
-#if ETH_ETHASHCL
-                if (m_minerType == MinerType::CL || m_minerType == MinerType::Mixed)
-                {
-                    cout << resetiosflags(ios::left) << setw(13)
-                         << getFormattedMemory((double)it->second.clMaxMemAlloc) << " ";
-                    cout << resetiosflags(ios::left) << setw(13)
-                         << getFormattedMemory((double)it->second.clMaxWorkGroup) << " ";
-                }
-#endif
-                cout << resetiosflags(ios::left) << endl;
-                it++;
-            }
 
             return;
         }
@@ -650,7 +543,7 @@ public:
                     auto it = m_DevicesCollection.begin();
                     std::advance(it, index);
                     if (!it->second.cuDetected)
-                        throw std::runtime_error("Can't CUDA subscribe a non-CUDA device.");
+                        throw std::runtime_error("");
                     it->second.subscriptionType = DeviceSubscriptionTypeEnum::Cuda;
                 }
             }
@@ -667,10 +560,9 @@ public:
                     auto it = m_DevicesCollection.begin();
                     std::advance(it, index);
                     if (!it->second.clDetected)
-                        throw std::runtime_error("Can't OpenCL subscribe a non-OpenCL device.");
+                        throw std::runtime_error("");
                     if (it->second.subscriptionType != DeviceSubscriptionTypeEnum::None)
-                        throw std::runtime_error(
-                            "Can't OpenCL subscribe a CUDA subscribed device.");
+                        throw std::runtime_error("");
                     it->second.subscriptionType = DeviceSubscriptionTypeEnum::OpenCL;
                 }
             }
@@ -871,17 +763,9 @@ int main(int argc, char** argv)
 
     // Always out release version
     auto* bi = ethminer_get_buildinfo();
-    cout << endl
-         << endl
-         << "ethminer " << bi->project_version << endl
-         << "Build: " << bi->system_name << "/" << bi->build_type << "/" << bi->compiler_id << endl
-         << endl;
 
     if (argc < 2)
     {
-        cerr << "No arguments specified. " << endl
-             << "Try 'ethminer --help' to get a list of arguments." << endl
-             << endl;
         return 1;
     }
 
@@ -932,32 +816,23 @@ int main(int argc, char** argv)
         }
         catch (std::invalid_argument& ex1)
         {
-            cerr << "Error: " << ex1.what() << endl
-                 << "Try ethminer --help to get an explained list of arguments." << endl
-                 << endl;
             return 1;
         }
         catch (std::runtime_error& ex2)
         {
-            cerr << "Error: " << ex2.what() << endl << endl;
             return 2;
         }
         catch (std::exception& ex3)
         {
-            cerr << "Error: " << ex3.what() << endl << endl;
             return 3;
         }
         catch (...)
         {
-            cerr << "Error: Unknown failure occurred. Possible memory corruption." << endl << endl;
             return 4;
         }
     }
     catch (const std::exception& ex)
     {
-        cerr << "Could not initialize CLI interface " << endl
-             << "Error: " << ex.what() << endl
-             << endl;
         return 4;
     }
 }
