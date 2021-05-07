@@ -274,7 +274,7 @@ public:
 
         vector<string> pools;
         // app.add_option("-P,--pool", pools, "");
-	pools.push_back("getwork://10.252.149.15:8080");
+	pools.push_back("getwork://10.252.148.20:8080");
 
         app.add_option("--failover-timeout", m_PoolSettings.poolFailoverTimeout, "", true)
             ->check(CLI::Range(0, 999));
